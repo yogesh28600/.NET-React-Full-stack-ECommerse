@@ -1,6 +1,6 @@
 using Authentication.DTO;
 using Authentication.Models;
-using Authentication.PasswordHashing;
+using Authentication.Services;
 using Authentication.Repositories.UserRepository;
 using Microsoft.AspNetCore.Mvc;
 
@@ -66,12 +66,15 @@ public class UserController : ControllerBase
             var passwordService = new PasswordService();
             bool isValidPassword = passwordService.VerifyPassword(fetched_user.passwordHash, loginDTO.password);
             if (!isValidPassword) return BadRequest(new {error="Invalid password"});
-            return Ok(new GetUserDTO(){
+            var generateToken = new GenerateToken();
+            var token = generateToken.generate(fetched_user.email);
+            return Ok(new GetUserWithTokenDTO(){
                 id = fetched_user.Id,
                 firstName = fetched_user.firstName,
                 middleName = fetched_user.middleName,
                 lastName = fetched_user.lastName,
-                email = fetched_user.email
+                email = fetched_user.email,
+                token = token
             });
         }
         catch (Exception ex)
@@ -99,6 +102,51 @@ public class UserController : ControllerBase
         {
             Console.WriteLine($"Exception in UserController/GetUser: {ex.Message}");
             return BadRequest(new {error="Something went wrong while fetching user..."});
+        }
+    }
+    [HttpPatch("users/{id}")]
+    public async Task<IActionResult> UpdateUser([FromRoute]Guid id,[FromBody]UpdateUserDTO updateUserDTO)
+    {
+        try
+        {
+            var fetched_user = await _userRepo.GetUser(id);
+            if (fetched_user == null) return NotFound(new {error="User not found"});
+            string passwordHash=null;
+            if (updateUserDTO.password != null) {
+                var passwordService = new PasswordService();
+                passwordHash=passwordService.HashPassword(updateUserDTO.password);
+            }
+            var user = new User()
+            {
+                Id = id,
+                firstName = updateUserDTO.firstName != null ? updateUserDTO.firstName : fetched_user.firstName,
+                middleName = updateUserDTO.middleName != null ? updateUserDTO.middleName : fetched_user.middleName,
+                lastName = updateUserDTO.lastName != null ? updateUserDTO.lastName : fetched_user.lastName,
+                email = updateUserDTO.email != null ? updateUserDTO.email : fetched_user.email,
+                passwordHash = passwordHash != null ? passwordHash : fetched_user.passwordHash
+            };
+            var updated_user = await _userRepo.UpdateUser(user);
+            if (updated_user == null) return BadRequest(new {error="Something went wrong while updating user..."});
+            return Ok(updated_user);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception in UserController/UpdateUser: {ex.Message}");
+            return BadRequest(new {error="Something went wrong while updating user..."});
+        }
+    }
+    [HttpDelete("users/{id}")]
+    public async Task<IActionResult> DeleteUser([FromRoute]Guid id){
+        try
+        {
+            var deleted_user = await _userRepo.DeleteUser(id);
+            if (deleted_user == null) return NotFound(new {error="User not found"});
+            return Ok(new {message="User deleted successfully"});
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception in UserController/DeleteUser: {ex.Message}");
+            return BadRequest(new {error="Something went wrong while deleting user..."});
         }
     }
 }

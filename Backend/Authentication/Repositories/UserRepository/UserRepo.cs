@@ -84,14 +84,15 @@ public class UserRepo : IUserRepo
     {
         try
         {
-            var existing_user = GetUser(user.Id);
-            if (existing_user != null)
+            var existingEntity = _context.Users.Find(user.Id);
+            if (existingEntity != null)
             {
-                var updated_user = _context.Users.Update(user);
-                await _context.SaveChangesAsync();
-                return updated_user.Entity;
+                _context.Entry(existingEntity).State = EntityState.Detached;
             }
-            return null;
+            var updated_user = _context.Users.Update(user);
+            Console.WriteLine(updated_user.Entity.middleName);
+            await _context.SaveChangesAsync();
+            return updated_user.Entity;
         }
         catch (Exception ex)
         {
