@@ -5,9 +5,11 @@ using System.Text;
 
 namespace Authentication.Services;
 
-public class GenerateToken{
-    public string generate(string email){
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("yk-techtown-gsadjhgjhsagjhgjhgjhsadgjhsadh"));
+public class GenerateToken
+{
+    public string generate(string email)
+    {
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY")));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var claims = new[]
         {
