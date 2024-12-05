@@ -12,5 +12,6 @@ public class AddProductDTO
     public float price { get; set; }
     [Required]
     public string category { get; set; }
+    public string brand { get; set; }
     public List<Image> images { get; set; } = new List<Image>();
 }

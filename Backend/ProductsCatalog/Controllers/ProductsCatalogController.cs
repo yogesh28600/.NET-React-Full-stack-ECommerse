@@ -56,6 +56,7 @@ public class ProductsCatalogController : ControllerBase
                 description = productDTO.description,
                 price = productDTO.price,
                 category = productDTO.category,
+                brand = productDTO.brand,
                 images = productDTO.images,
                 createdAt = DateTime.UtcNow
             };
@@ -80,6 +81,7 @@ public class ProductsCatalogController : ControllerBase
             product.description = productDTO.description != null ? productDTO.description : product.description;
             product.price = productDTO.price > 0 ? productDTO.price : product.price;
             product.category = productDTO.category != null ? productDTO.category : product.category;
+            product.brand = productDTO.brand != null ? productDTO.brand : product.brand;
             var updated_product = await _productRepo.UpdateProduct(product);
             if (updated_product == null) return BadRequest(new { error = "Something went wrong while updating product..." });
             return Ok(updated_product);

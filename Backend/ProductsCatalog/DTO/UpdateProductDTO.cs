@@ -10,5 +10,6 @@ public class UpdateProductDTO
     public string description { get; set; }
     public float price { get; set; }
     public string category { get; set; }
+    public string brand { get; set; }
     public List<Image> images { get; set; } = new List<Image>();
 }
