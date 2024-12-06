@@ -39,7 +39,7 @@ public class CartController : ControllerBase
             {
                 itemId = cartItemDTO.itemId,
                 quantity = cartItemDTO.quantity,
-                totalPrice = cartItemDTO.totalPrice
+                itemPrice = cartItemDTO.itemPrice
             };
             var cart = await _cartRepo.AddItemToCart(id, cartItem);
             if (cart == null) return BadRequest(new { error = "something went wrong while adding item to cart..." });
@@ -102,13 +102,44 @@ public class CartController : ControllerBase
         try
         {
             var cart = await _cartRepo.RemoveItemFromCart(cartId, itemId);
-            if (cart == null) return BadRequest(new { error = "something went wrong while fetching cart..." });
+            if (cart == null) return BadRequest(new { error = "something went wrong while deleting item from cart..." });
             return Ok(cart);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception in CartController/GetCartByUser: {ex.Message}");
-            return BadRequest(new { error = "something went wrong while fetching cart..." });
+            Console.WriteLine($"Exception in CartController/RemoveItemFromCart: {ex.Message}");
+            return BadRequest(new { error = "something went wrong while deleting item from cart..." });
         }
     }
+    [HttpPost("carts/update-item-quantity/{cartId}/{itemId}/{qty}")]
+    public async Task<IActionResult> UpdateCartItemQty([FromRoute] Guid itemId, [FromRoute] Guid cartId, int qty)
+    {
+        try
+        {
+            var cart = await _cartRepo.UpdateQuantity(cartId, itemId, qty);
+            if (cart == null) return BadRequest(new { error = "something went wrong while updating item quantity..." });
+            return Ok(cart);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception in CartController/UpdateQuantity: {ex.Message}");
+            return BadRequest(new { error = "something went wrong while updating item quantity..." });
+        }
+    }
+    [HttpDelete("carts/{cartId}")]
+    public async Task<IActionResult> DeleteCart([FromRoute] Guid cartId)
+    {
+        try
+        {
+            var cart = await _cartRepo.DeleteCart(cartId);
+            if (cart == null) return BadRequest(new { error = "something went wrong while deleting cart..." });
+            return Ok(cart);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception in CartController/DeleteCart: {ex.Message}");
+            return BadRequest(new { error = "something went wrong while deleting cart..." });
+        }
+    }
+
 }

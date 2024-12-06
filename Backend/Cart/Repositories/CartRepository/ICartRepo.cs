@@ -10,4 +10,5 @@ public interface ICartRepo
     public Task<ShoppingCart> RemoveItemFromCart(Guid cartId, Guid itemId);
     public Task<ShoppingCart> UpdateQuantity(Guid cartId, Guid itemId, int quantity);
     public Task<ShoppingCart> ClearCart(Guid cartId);
+    public Task<ShoppingCart> DeleteCart(Guid cartId);
 }
